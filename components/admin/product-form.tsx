@@ -94,7 +94,7 @@ export function ProductForm({
     close()
   }
   return (
-    <form onSubmit={submit} className="space-y-5" data-testid="product-form">
+    <form noValidate onSubmit={submit} className="space-y-5" data-testid="product-form">
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Product name">
           <input

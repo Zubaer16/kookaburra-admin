@@ -116,7 +116,11 @@ test('store settings reject unsafe URL and persist English/USD defaults', async 
     page.getByRole('button', { name: 'Save store settings' }),
     'Validate HTTPS URL',
   )
-  await expect(page.getByRole('alert')).toContainText('HTTPS')
+  await expect(
+    page.getByText('Website URL must be a valid HTTPS address.', {
+      exact: true,
+    }),
+  ).toBeVisible()
   await fill(
     page,
     page.getByRole('textbox', { name: 'Storefront URL (HTTPS)' }),

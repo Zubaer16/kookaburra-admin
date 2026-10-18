@@ -22,6 +22,12 @@ test('create a product with size/color variant SKUs and image reference', async 
     'FS-TRAIL-900',
     'Enter base SKU',
   )
+  await select(
+    page,
+    page.getByRole('combobox', { name: 'Category', exact: true }),
+    'cat-fashion',
+    'Choose Fashion category',
+  )
   await fill(
     page,
     page.getByRole('spinbutton', { name: 'Price (USD)' }),
@@ -79,6 +85,9 @@ test('create a product with size/color variant SKUs and image reference', async 
     page.getByRole('button', { name: 'Create product' }),
     'Save preview product',
   )
+  // A closed dialog verifies that the form submitted rather than staying
+  // open with an error or an unreported native browser validation failure.
+  await expect(page.getByRole('dialog')).toHaveCount(0)
   await expect(page.getByText('Trail Everyday Hoodie')).toBeVisible()
   await click(
     page,

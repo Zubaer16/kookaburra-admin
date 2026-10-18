@@ -218,7 +218,7 @@ export const useAdminStore = create<AdminState>()(
             {
               id: newId('audit'),
               at: new Date().toISOString(),
-              area: 'Staff',
+              area: 'Staff' as const,
               action: existing ? 'Staff updated' : 'Staff added',
               detail: `${member.name} · ${member.role} · ${member.status}`,
             },
@@ -236,7 +236,7 @@ export const useAdminStore = create<AdminState>()(
             {
               id: newId('audit'),
               at: new Date().toISOString(),
-              area: 'Staff',
+              area: 'Staff' as const,
               action: 'Staff removed',
               detail: member.name,
             },
@@ -254,7 +254,7 @@ export const useAdminStore = create<AdminState>()(
             {
               id: newId('audit'),
               at: new Date().toISOString(),
-              area: 'Roles',
+              area: 'Roles' as const,
               action: 'Role permissions updated',
               detail: `${role} · ${permissions.length} preview permissions`,
             },
@@ -280,7 +280,7 @@ export const useAdminStore = create<AdminState>()(
             {
               id: newId('audit'),
               at: new Date().toISOString(),
-              area: 'Settings',
+              area: 'Settings' as const,
               action: 'Store settings updated',
               detail: 'Local store profile preview saved',
             },
