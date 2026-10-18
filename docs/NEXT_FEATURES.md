@@ -3,7 +3,7 @@
 This repository intentionally starts with a polished, testable frontend foundation. Subsequent frontend work, **before backend implementation**, includes:
 
 1. **Implemented frontend previews:** size/color/SKU product variants, stock adjustment per variant, image references, nested category management and field validation. Remaining: real media uploads, bulk actions and publishing governance.
-2. Order workflows: detail view, delivery/return/refund interfaces, shipping timelines and guarded status transitions.
+2. **Implemented frontend preview:** order details, shipment references, activity timeline, guarded status transitions, reasoned cancellation, return decisions, capped refund records. Remaining: real carrier integrations, financial settlement, per-line return eligibility and server audit enforcement.
 3. Promotions, website content management (hero banners and merchandising), shipping zones/rates, tax settings and payment reporting UI.
 4. Staff/role screens with visual permission matrix (server enforcement later), global settings and reporting.
 5. Accessibility, keyboard navigation, mobile/tablet layouts, error/empty/loading states and exhaustive Playwright E2E coverage.

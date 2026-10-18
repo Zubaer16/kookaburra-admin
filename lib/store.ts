@@ -9,7 +9,16 @@ import type {
   Order,
   OrderStatus,
   StockEvent,
+  ShipmentPreview,
 } from './types'
+import {
+  canAdvanceStatus,
+  canCancelOrder,
+  canSaveShipment,
+  canRequestReturn,
+  canDecideReturn,
+  validRefund,
+} from './order-workflow'
 import {
   stockOf,
   productValidationError,
@@ -45,7 +54,15 @@ type AdminState = {
     note: string,
     variantId?: string,
   ) => boolean
-  updateOrderStatus: (id: string, status: OrderStatus) => void
+  updateOrderStatus: (id: string, status: OrderStatus) => boolean
+  saveShipment: (
+    id: string,
+    shipment: Omit<ShipmentPreview, 'updatedAt'>,
+  ) => boolean
+  cancelOrder: (id: string, reason: string) => boolean
+  requestReturn: (id: string, reason: string) => boolean
+  decideReturn: (id: string, decision: 'Approved' | 'Rejected') => boolean
+  recordRefund: (id: string, amount: number, note: string) => boolean
   resetPreview: () => void
 }
 const newId = (prefix: string) =>
@@ -60,6 +77,8 @@ const base = () => ({
   orders: seedOrders.map((o) => ({
     ...o,
     items: o.items.map((i) => ({ ...i })),
+    timeline: [],
+    refunds: [],
   })),
   customers: seedCustomers.map((c) => ({ ...c })),
   stockEvents: [] as StockEvent[],
@@ -232,10 +251,187 @@ export const useAdminStore = create<AdminState>()(
         }))
         return true
       },
-      updateOrderStatus: (id, status) =>
+      updateOrderStatus: (id, status) => {
+        const order = get().orders.find((o) => o.id === id)
+        if (!order || !canAdvanceStatus(order.status, status)) return false
         set((s) => ({
-          orders: s.orders.map((o) => (o.id === id ? { ...o, status } : o)),
-        })),
+          orders: s.orders.map((o) =>
+            o.id !== id
+              ? o
+              : {
+                  ...o,
+                  status,
+                  timeline: [
+                    {
+                      id: newId('event'),
+                      at: new Date().toISOString(),
+                      title: `Status: ${status}`,
+                      detail: `Advanced from ${o.status}`,
+                    },
+                    ...(o.timeline ?? []),
+                  ],
+                },
+          ),
+        }))
+        return true
+      },
+      saveShipment: (id, values) => {
+        const order = get().orders.find((o) => o.id === id)
+        if (
+          !order ||
+          !canSaveShipment(order) ||
+          !values.carrier.trim() ||
+          !values.trackingNumber.trim()
+        )
+          return false
+        const at = new Date().toISOString()
+        set((s) => ({
+          orders: s.orders.map((o) =>
+            o.id !== id
+              ? o
+              : {
+                  ...o,
+                  status: 'Shipped',
+                  shipment: {
+                    carrier: values.carrier.trim(),
+                    trackingNumber: values.trackingNumber.trim(),
+                    service: values.service.trim(),
+                    estimatedDelivery: values.estimatedDelivery,
+                    updatedAt: at,
+                  },
+                  timeline: [
+                    {
+                      id: newId('event'),
+                      at,
+                      title: 'Shipment saved',
+                      detail: `${values.carrier.trim()} · ${values.trackingNumber.trim()}`,
+                    },
+                    ...(o.timeline ?? []),
+                  ],
+                },
+          ),
+        }))
+        return true
+      },
+      cancelOrder: (id, reason) => {
+        const order = get().orders.find((o) => o.id === id)
+        const clean = reason.trim()
+        if (!order || !canCancelOrder(order) || clean.length < 5) return false
+        set((s) => ({
+          orders: s.orders.map((o) =>
+            o.id !== id
+              ? o
+              : {
+                  ...o,
+                  status: 'Cancelled',
+                  cancellationReason: clean,
+                  timeline: [
+                    {
+                      id: newId('event'),
+                      at: new Date().toISOString(),
+                      title: 'Order cancelled',
+                      detail: clean,
+                    },
+                    ...(o.timeline ?? []),
+                  ],
+                },
+          ),
+        }))
+        return true
+      },
+      requestReturn: (id, reason) => {
+        const order = get().orders.find((o) => o.id === id)
+        const clean = reason.trim()
+        if (!order || !canRequestReturn(order) || clean.length < 5) return false
+        const at = new Date().toISOString()
+        set((s) => ({
+          orders: s.orders.map((o) =>
+            o.id !== id
+              ? o
+              : {
+                  ...o,
+                  returnRequest: {
+                    id: newId('return'),
+                    reason: clean,
+                    status: 'Requested',
+                    requestedAt: at,
+                  },
+                  timeline: [
+                    {
+                      id: newId('event'),
+                      at,
+                      title: 'Return requested',
+                      detail: clean,
+                    },
+                    ...(o.timeline ?? []),
+                  ],
+                },
+          ),
+        }))
+        return true
+      },
+      decideReturn: (id, decision) => {
+        const order = get().orders.find((o) => o.id === id)
+        if (!order || !canDecideReturn(order)) return false
+        const at = new Date().toISOString()
+        set((s) => ({
+          orders: s.orders.map((o) =>
+            o.id !== id
+              ? o
+              : {
+                  ...o,
+                  returnRequest: o.returnRequest
+                    ? { ...o.returnRequest, status: decision, resolvedAt: at }
+                    : undefined,
+                  timeline: [
+                    {
+                      id: newId('event'),
+                      at,
+                      title: `Return ${decision.toLowerCase()}`,
+                      detail: 'Decision saved in local preview only',
+                    },
+                    ...(o.timeline ?? []),
+                  ],
+                },
+          ),
+        }))
+        return true
+      },
+      recordRefund: (id, amount, note) => {
+        const order = get().orders.find((o) => o.id === id)
+        if (!order || !validRefund(order, amount) || note.trim().length < 3)
+          return false
+        const at = new Date().toISOString()
+        const rounded = Math.round(amount * 100) / 100
+        set((s) => ({
+          orders: s.orders.map((o) =>
+            o.id !== id
+              ? o
+              : {
+                  ...o,
+                  refunds: [
+                    ...(o.refunds ?? []),
+                    {
+                      id: newId('refund'),
+                      amount: rounded,
+                      note: note.trim(),
+                      at,
+                    },
+                  ],
+                  timeline: [
+                    {
+                      id: newId('event'),
+                      at,
+                      title: 'Refund preview recorded',
+                      detail: `$${rounded.toFixed(2)} — ${note.trim()}`,
+                    },
+                    ...(o.timeline ?? []),
+                  ],
+                },
+          ),
+        }))
+        return true
+      },
       resetPreview: () => set(base()),
     }),
     {

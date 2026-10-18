@@ -27,7 +27,7 @@ Open <http://localhost:3000>. The root route opens the dashboard.
 - **Products:** search, filter, create/edit products, size/color/SKU variants, image references and preview stock totals
 - **Categories:** add, edit, nest subcategories and delete only unused leaf categories
 - **Inventory:** simulate product or variant-level stock adjustments with a recent-activity list
-- **Orders:** view sample line items and change preview order status
+- **Orders:** itemized order details, forward-only fulfillment transitions, local shipment tracking, cancellation, return decisions, refund preview and activity timeline
 - **Customers:** view sample customer profiles and sales history
 
 All UI text is English, and all displayed prices use USD. No special Bangladesh market mode exists.
@@ -71,6 +71,10 @@ npm run test:e2e:visual
 ## Architecture
 
 The admin and customer storefront are separate Next.js applications. Eventually both must consume the same versioned, independent REST API. See [architecture notes](docs/ARCHITECTURE.md).
+
+## Order workflow details
+
+See [Order workflows](docs/ORDER_WORKFLOWS.md) for fulfillment transitions, shipment previews, returns and refund limits. All workflows are simulated locally; no real carrier or payment actions occur.
 
 ## Catalog workflow details
 

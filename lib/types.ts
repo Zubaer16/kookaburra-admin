@@ -43,6 +43,33 @@ export type Customer = {
   location: string
   joinedAt: string
 }
+export type ShipmentPreview = {
+  carrier: string
+  trackingNumber: string
+  service: string
+  estimatedDelivery: string
+  updatedAt: string
+}
+export type OrderTimelineEvent = {
+  id: string
+  at: string
+  title: string
+  detail: string
+}
+export type ReturnDecision = 'Requested' | 'Approved' | 'Rejected'
+export type ReturnPreview = {
+  id: string
+  reason: string
+  status: ReturnDecision
+  requestedAt: string
+  resolvedAt?: string
+}
+export type RefundRecord = {
+  id: string
+  amount: number
+  note: string
+  at: string
+}
 export type Order = {
   id: string
   customerId: string
@@ -51,6 +78,11 @@ export type Order = {
   createdAt: string
   channel: 'Web' | 'Mobile'
   country: string
+  shipment?: ShipmentPreview
+  timeline?: OrderTimelineEvent[]
+  cancellationReason?: string
+  returnRequest?: ReturnPreview
+  refunds?: RefundRecord[]
 }
 export type StockEvent = {
   id: string

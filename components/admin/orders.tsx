@@ -1,16 +1,16 @@
 'use client'
 import { useMemo, useState } from 'react'
-import { Search, Eye, ShoppingBag } from 'lucide-react'
+import { Search, Eye } from 'lucide-react'
 import { useAdminStore } from '@/lib/store'
 import { PageHeading } from './page-heading'
 import { Badge, statusKind } from '@/components/ui/badge'
 import { Panel, EmptyState } from '@/components/ui/panel'
 import { Button } from '@/components/ui/button'
-import { Modal } from '@/components/ui/modal'
 import { controlClass } from '@/components/ui/field'
-import type { Order, OrderStatus } from '@/lib/types'
+import type { OrderStatus } from '@/lib/types'
 import { orderTotal } from '@/lib/fixtures'
 import { money, shortDate } from '@/lib/utils'
+import { OrderDetails } from './order-details'
 const statuses: OrderStatus[] = [
   'Pending',
   'Processing',
@@ -19,12 +19,11 @@ const statuses: OrderStatus[] = [
   'Cancelled',
 ]
 export function Orders() {
-  const orders = useAdminStore((s) => s.orders),
-    customers = useAdminStore((s) => s.customers),
-    update = useAdminStore((s) => s.updateOrderStatus)
-  const [query, setQuery] = useState(''),
-    [filter, setFilter] = useState('all'),
-    [selected, setSelected] = useState<Order | null>(null)
+  const orders = useAdminStore((s) => s.orders)
+  const customers = useAdminStore((s) => s.customers)
+  const [query, setQuery] = useState('')
+  const [filter, setFilter] = useState('all')
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const list = useMemo(
     () =>
       orders
@@ -38,13 +37,35 @@ export function Orders() {
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     [orders, customers, filter, query],
   )
+  const pending = orders.filter(
+    (o) => o.status === 'Pending' || o.status === 'Processing',
+  ).length
+  const inTransit = orders.filter((o) => o.status === 'Shipped').length
+  const returns = orders.filter(
+    (o) => o.returnRequest?.status === 'Requested',
+  ).length
   return (
     <>
       <PageHeading
         eyebrow="FULFILLMENT"
         title="Orders"
-        description="Track order flow and preview operational status changes."
+        description="Review fulfillment, shipments and return/refund previews in one place."
       />
+      <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {[
+          ['Orders requiring action', pending],
+          ['Shipped orders', inTransit],
+          ['Return requests', returns],
+        ].map(([label, value]) => (
+          <div
+            key={label}
+            className="rounded-2xl border border-line bg-white p-4"
+          >
+            <p className="text-xs font-bold text-muted">{label}</p>
+            <p className="mt-2 text-2xl font-black">{value}</p>
+          </div>
+        ))}
+      </div>
       <Panel className="overflow-hidden">
         <div className="flex flex-wrap gap-3 border-b border-line p-4 sm:p-5">
           <label className="relative min-w-[200px] flex-1 sm:max-w-sm">
@@ -64,8 +85,8 @@ export function Orders() {
             onChange={(e) => setFilter(e.target.value)}
           >
             <option value="all">All orders</option>
-            {statuses.map((status) => (
-              <option key={status}>{status}</option>
+            {statuses.map((s) => (
+              <option key={s}>{s}</option>
             ))}
           </select>
         </div>
@@ -79,6 +100,7 @@ export function Orders() {
                 <th>Country</th>
                 <th>Total</th>
                 <th>Status</th>
+                <th>Return / tracking</th>
                 <th className="text-right">Details</th>
               </tr>
             </thead>
@@ -96,14 +118,20 @@ export function Orders() {
                   <td>
                     <Badge kind={statusKind(o.status)}>{o.status}</Badge>
                   </td>
+                  <td className="text-xs text-muted">
+                    {o.returnRequest
+                      ? `Return: ${o.returnRequest.status}`
+                      : o.shipment
+                        ? `Tracking: ${o.shipment.trackingNumber}`
+                        : '—'}
+                  </td>
                   <td className="text-right">
                     <Button
                       variant="secondary"
                       size="sm"
-                      onClick={() => setSelected(o)}
+                      onClick={() => setSelectedId(o.id)}
                     >
-                      <Eye size={14} />
-                      View
+                      <Eye size={14} /> View
                     </Button>
                   </td>
                 </tr>
@@ -113,77 +141,7 @@ export function Orders() {
           {!list.length && <EmptyState title="No matching orders" />}
         </div>
       </Panel>
-      {selected && (
-        <Modal
-          title={`Order ${selected.id}`}
-          description="Status changes are saved locally for preview only."
-          open={!!selected}
-          onOpenChange={(v) => {
-            if (!v) setSelected(null)
-          }}
-        >
-          <div className="space-y-5">
-            <div className="flex flex-wrap justify-between gap-3 rounded-xl bg-slate-50 p-4 text-sm">
-              <div>
-                <p className="text-xs font-semibold text-muted">Customer</p>
-                <p className="mt-1 font-bold">
-                  {customers.find((c) => c.id === selected.customerId)?.name ??
-                    'Unknown'}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-muted">Destination</p>
-                <p className="mt-1 font-bold">{selected.country}</p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-muted">Channel</p>
-                <p className="mt-1 font-bold">{selected.channel}</p>
-              </div>
-            </div>
-            <div>
-              {selected.items.map((item) => (
-                <div
-                  className="flex justify-between border-b border-line py-3 text-sm"
-                  key={item.productId}
-                >
-                  <div>
-                    <p className="font-semibold">{item.name}</p>
-                    <p className="text-xs text-muted">Qty: {item.qty}</p>
-                  </div>
-                  <span className="font-bold">
-                    {money(item.qty * item.price)}
-                  </span>
-                </div>
-              ))}
-              <div className="flex justify-between py-4 font-black">
-                <span>Total</span>
-                <span>{money(orderTotal(selected))}</span>
-              </div>
-            </div>
-            <label className="block text-sm font-bold">
-              Fulfillment status
-              <select
-                aria-label="Change order status"
-                className={controlClass + ' mt-2'}
-                value={
-                  orders.find((o) => o.id === selected.id)?.status ??
-                  selected.status
-                }
-                onChange={(e) =>
-                  update(selected.id, e.target.value as OrderStatus)
-                }
-              >
-                {statuses.map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </select>
-            </label>
-            <div className="flex justify-end">
-              <Button onClick={() => setSelected(null)}>Done</Button>
-            </div>
-          </div>
-        </Modal>
-      )}
+      <OrderDetails id={selectedId} onClose={() => setSelectedId(null)} />
     </>
   )
 }
