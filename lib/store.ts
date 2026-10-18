@@ -27,6 +27,20 @@ import {
 } from './order-workflow'
 import { shippingZoneError, taxRuleError } from './commerce-policy'
 import {
+  seedStaff,
+  seedRolePermissions,
+  defaultStoreSettings,
+  staffError,
+  settingsError,
+  rolePermissionsError,
+  type StaffMember,
+  type StaffRole,
+  type PermissionKey,
+  type RolePermissions,
+  type StoreSettings,
+  type ActivityEvent,
+} from './workspace-policy'
+import {
   promotionError,
   campaignError,
   bannerError,
@@ -64,6 +78,17 @@ type AdminState = {
   collections: FeaturedCollection[]
   shippingZones: ShippingZone[]
   taxRules: TaxRule[]
+  staff: StaffMember[]
+  rolePermissions: RolePermissions
+  storeSettings: StoreSettings
+  activity: ActivityEvent[]
+  saveStaff: (member: StaffMember) => string | null
+  removeStaff: (id: string) => boolean
+  saveRolePermissions: (
+    role: StaffRole,
+    permissions: PermissionKey[],
+  ) => string | null
+  saveStoreSettings: (settings: StoreSettings) => string | null
   saveShippingZone: (input: ShippingZone) => string | null
   removeShippingZone: (id: string) => void
   saveTaxRule: (input: TaxRule) => string | null
@@ -134,6 +159,15 @@ const base = () => ({
     services: z.services.map((s) => ({ ...s })),
   })),
   taxRules: seedTaxRules.map((r) => ({ ...r })),
+  staff: seedStaff.map((s) => ({ ...s })),
+  rolePermissions: Object.fromEntries(
+    Object.entries(seedRolePermissions).map(([role, permissions]) => [
+      role,
+      [...permissions],
+    ]),
+  ) as RolePermissions,
+  storeSettings: { ...defaultStoreSettings },
+  activity: [] as ActivityEvent[],
 })
 function sanitizeProduct(input: ProductInput): ProductInput {
   const variants =
@@ -166,6 +200,95 @@ export const useAdminStore = create<AdminState>()(
   persist(
     (set, get) => ({
       ...base(),
+      saveStaff: (input) => {
+        const member = {
+          ...input,
+          id: input.id || newId('staff'),
+          name: input.name.trim(),
+          email: input.email.trim().toLowerCase(),
+        }
+        const error = staffError(member, get().staff)
+        if (error) return error
+        const existing = get().staff.some((s) => s.id === member.id)
+        set((s) => ({
+          staff: existing
+            ? s.staff.map((item) => (item.id === member.id ? member : item))
+            : [...s.staff, member],
+          activity: [
+            {
+              id: newId('audit'),
+              at: new Date().toISOString(),
+              area: 'Staff',
+              action: existing ? 'Staff updated' : 'Staff added',
+              detail: `${member.name} · ${member.role} · ${member.status}`,
+            },
+            ...s.activity,
+          ].slice(0, 100),
+        }))
+        return null
+      },
+      removeStaff: (id) => {
+        const member = get().staff.find((s) => s.id === id)
+        if (!member || member.role === 'Owner') return false
+        set((s) => ({
+          staff: s.staff.filter((m) => m.id !== id),
+          activity: [
+            {
+              id: newId('audit'),
+              at: new Date().toISOString(),
+              area: 'Staff',
+              action: 'Staff removed',
+              detail: member.name,
+            },
+            ...s.activity,
+          ].slice(0, 100),
+        }))
+        return true
+      },
+      saveRolePermissions: (role, permissions) => {
+        const error = rolePermissionsError(role, permissions)
+        if (error) return error
+        set((s) => ({
+          rolePermissions: { ...s.rolePermissions, [role]: [...permissions] },
+          activity: [
+            {
+              id: newId('audit'),
+              at: new Date().toISOString(),
+              area: 'Roles',
+              action: 'Role permissions updated',
+              detail: `${role} · ${permissions.length} preview permissions`,
+            },
+            ...s.activity,
+          ].slice(0, 100),
+        }))
+        return null
+      },
+      saveStoreSettings: (input) => {
+        const settings = {
+          ...input,
+          storeName: input.storeName.trim(),
+          supportEmail: input.supportEmail.trim().toLowerCase(),
+          websiteUrl: input.websiteUrl.trim(),
+          orderPrefix: input.orderPrefix.trim(),
+          supportNotice: input.supportNotice.trim(),
+        }
+        const error = settingsError(settings)
+        if (error) return error
+        set((s) => ({
+          storeSettings: settings,
+          activity: [
+            {
+              id: newId('audit'),
+              at: new Date().toISOString(),
+              area: 'Settings',
+              action: 'Store settings updated',
+              detail: 'Local store profile preview saved',
+            },
+            ...s.activity,
+          ].slice(0, 100),
+        }))
+        return null
+      },
       addProduct: (input) => {
         if (
           !get().categories.some((c) => c.id === input.categoryId) ||
@@ -646,6 +769,22 @@ export const useAdminStore = create<AdminState>()(
           taxRules: Array.isArray(saved.taxRules)
             ? saved.taxRules
             : current.taxRules,
+          staff: Array.isArray(saved.staff) ? saved.staff : current.staff,
+          rolePermissions:
+            saved.rolePermissions && typeof saved.rolePermissions === 'object'
+              ? {
+                  ...current.rolePermissions,
+                  ...saved.rolePermissions,
+                  Owner: [...seedRolePermissions.Owner],
+                }
+              : current.rolePermissions,
+          storeSettings:
+            saved.storeSettings && typeof saved.storeSettings === 'object'
+              ? { ...current.storeSettings, ...saved.storeSettings }
+              : current.storeSettings,
+          activity: Array.isArray(saved.activity)
+            ? saved.activity
+            : current.activity,
         }
       },
       partialize: (s) => ({
@@ -660,6 +799,10 @@ export const useAdminStore = create<AdminState>()(
         collections: s.collections,
         shippingZones: s.shippingZones,
         taxRules: s.taxRules,
+        staff: s.staff,
+        rolePermissions: s.rolePermissions,
+        storeSettings: s.storeSettings,
+        activity: s.activity,
       }),
     },
   ),

@@ -33,6 +33,9 @@ Open <http://localhost:3000>. The root route opens the dashboard.
 - **Store content:** edit sample hero banners and featured product collections
 - **Shipping & taxes:** configure local-only international zones, sample rates, thresholds and illustrative tax rules
 - **Payment reporting:** search/filter read-only, fictional payment examples; never real Stripe transactions
+- **Staff & roles:** sample staff records and editable visual permission matrix (not enforced)
+- **Store settings:** draft store identity, timezone and support preferences; English/USD locked
+- **Activity preview:** browser-local history for staff, roles and settings edits only
 
 All UI text is English, and all displayed prices use USD. No special Bangladesh market mode exists.
 
@@ -50,12 +53,17 @@ See [Merchandising workflows](docs/MERCHANDISING.md). Editing a banner or coupon
 
 See [shipping, tax and payment contract notes](docs/SHIPPING_PAYMENT_PREVIEWS.md) and the [two-frontend compatibility audit](docs/CROSS_FRONTEND_ALIGNMENT.md). Admin preview policies are **not transmitted to the Storefront**, whose checkout still uses fixed sample fees.
 
+## Workspace previews
+
+See [workspace previews](docs/WORKSPACE_PREVIEWS.md). Role editing does not secure the Admin. Local activity is not a real audit trail.
+
 ## Quality checks
 
 ```powershell
 npm run verify
 npm run verify:merchandising
 npm run verify:commerce
+npm run verify:workspace
 npm run typecheck
 npm run lint
 npm run build

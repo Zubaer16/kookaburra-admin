@@ -21,6 +21,9 @@ import {
   Images,
   Truck,
   CreditCard,
+  UserRoundCog,
+  Settings2,
+  ClipboardList,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAdminStore } from '@/lib/store'
@@ -36,6 +39,9 @@ const links = [
   { href: '/content', label: 'Store content', icon: Images },
   { href: '/shipping', label: 'Shipping & taxes', icon: Truck },
   { href: '/payments', label: 'Payments', icon: CreditCard },
+  { href: '/staff', label: 'Staff & roles', icon: UserRoundCog },
+  { href: '/settings', label: 'Store settings', icon: Settings2 },
+  { href: '/activity', label: 'Activity preview', icon: ClipboardList },
 ]
 function Logo() {
   return (
