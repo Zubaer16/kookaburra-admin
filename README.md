@@ -24,9 +24,9 @@ Open <http://localhost:3000>. The root route opens the dashboard.
 ## Current sections
 
 - **Dashboard:** summary KPIs, illustrative sales trend, alerts, recent orders
-- **Products:** search, filter, create, edit and remove sample products
-- **Categories:** add and remove empty categories
-- **Inventory:** simulate stock adjustments with a recent-activity list
+- **Products:** search, filter, create/edit products, size/color/SKU variants, image references and preview stock totals
+- **Categories:** add, edit, nest subcategories and delete only unused leaf categories
+- **Inventory:** simulate product or variant-level stock adjustments with a recent-activity list
 - **Orders:** view sample line items and change preview order status
 - **Customers:** view sample customer profiles and sales history
 
@@ -71,3 +71,7 @@ npm run test:e2e:visual
 ## Architecture
 
 The admin and customer storefront are separate Next.js applications. Eventually both must consume the same versioned, independent REST API. See [architecture notes](docs/ARCHITECTURE.md).
+
+## Catalog workflow details
+
+See [Catalog workflows](docs/CATALOG_WORKFLOWS.md) for product variants, SKU validation, hierarchy and media reference behavior.

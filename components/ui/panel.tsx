@@ -1,4 +1,52 @@
 import { cn } from '@/lib/utils'
-export function Panel({children,className}:{children:React.ReactNode;className?:string}){return <section className={cn('rounded-2xl border border-line bg-white shadow-[0_3px_18px_rgba(15,23,42,.025)]',className)}>{children}</section>}
-export function SectionHeading({title,subtitle,action}:{title:string;subtitle?:string;action?:React.ReactNode}){return <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-base font-bold text-ink">{title}</h2>{subtitle&&<p className="mt-1 text-xs text-muted">{subtitle}</p>}</div>{action}</div>}
-export function EmptyState({title,description}:{title:string;description?:string}){return <div className="p-12 text-center"><p className="text-sm font-semibold text-ink">{title}</p>{description&&<p className="mt-1 text-xs text-muted">{description}</p>}</div>}
+export function Panel({
+  children,
+  className,
+}: {
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <section
+      className={cn(
+        'rounded-2xl border border-line bg-white shadow-[0_3px_18px_rgba(15,23,42,.025)]',
+        className,
+      )}
+    >
+      {children}
+    </section>
+  )
+}
+export function SectionHeading({
+  title,
+  subtitle,
+  action,
+}: {
+  title: string
+  subtitle?: string
+  action?: React.ReactNode
+}) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h2 className="text-base font-bold text-ink">{title}</h2>
+        {subtitle && <p className="mt-1 text-xs text-muted">{subtitle}</p>}
+      </div>
+      {action}
+    </div>
+  )
+}
+export function EmptyState({
+  title,
+  description,
+}: {
+  title: string
+  description?: string
+}) {
+  return (
+    <div className="p-12 text-center">
+      <p className="text-sm font-semibold text-ink">{title}</p>
+      {description && <p className="mt-1 text-xs text-muted">{description}</p>}
+    </div>
+  )
+}
