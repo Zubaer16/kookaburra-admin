@@ -10,6 +10,10 @@ import type {
   OrderStatus,
   StockEvent,
   ShipmentPreview,
+  Promotion,
+  Campaign,
+  StoreBanner,
+  FeaturedCollection,
 } from './types'
 import {
   canAdvanceStatus,
@@ -20,11 +24,23 @@ import {
   validRefund,
 } from './order-workflow'
 import {
+  promotionError,
+  campaignError,
+  bannerError,
+  collectionError,
+  couponCode,
+  campaignSlug,
+} from './merchandising'
+import {
   stockOf,
   productValidationError,
   categoryParentWouldCycle,
 } from './catalog'
 import {
+  seedPromotions,
+  seedCampaigns,
+  seedBanners,
+  seedCollections,
   seedCategories,
   seedProducts,
   seedCustomers,
@@ -37,6 +53,18 @@ type AdminState = {
   orders: Order[]
   customers: Customer[]
   stockEvents: StockEvent[]
+  promotions: Promotion[]
+  campaigns: Campaign[]
+  banners: StoreBanner[]
+  collections: FeaturedCollection[]
+  savePromotion: (item: Promotion) => string | null
+  removePromotion: (id: string) => void
+  saveCampaign: (item: Campaign) => string | null
+  removeCampaign: (id: string) => void
+  saveBanner: (item: StoreBanner) => string | null
+  removeBanner: (id: string) => void
+  saveCollection: (item: FeaturedCollection) => string | null
+  removeCollection: (id: string) => void
   addProduct: (p: ProductInput) => string
   editProduct: (id: string, p: ProductInput) => void
   deleteProduct: (id: string) => void
@@ -82,6 +110,13 @@ const base = () => ({
   })),
   customers: seedCustomers.map((c) => ({ ...c })),
   stockEvents: [] as StockEvent[],
+  promotions: seedPromotions.map((p) => ({ ...p })),
+  campaigns: seedCampaigns.map((c) => ({ ...c })),
+  banners: seedBanners.map((b) => ({ ...b })),
+  collections: seedCollections.map((c) => ({
+    ...c,
+    productIds: [...c.productIds],
+  })),
 })
 function sanitizeProduct(input: ProductInput): ProductInput {
   const variants =
@@ -146,7 +181,17 @@ export const useAdminStore = create<AdminState>()(
         }))
       },
       deleteProduct: (id) =>
-        set((s) => ({ products: s.products.filter((p) => p.id !== id) })),
+        set((s) => ({
+          products: s.products.filter((p) => p.id !== id),
+          collections: s.collections.map((c) => {
+            const productIds = c.productIds.filter((pid) => pid !== id)
+            return {
+              ...c,
+              productIds,
+              enabled: productIds.length > 0 && c.enabled,
+            }
+          }),
+        })),
       addCategory: (name, description, parentId) => {
         const clean = name.trim()
         const slug = clean
@@ -208,7 +253,10 @@ export const useAdminStore = create<AdminState>()(
       deleteCategory: (id) => {
         if (
           get().products.some((p) => p.categoryId === id) ||
-          get().categories.some((c) => c.parentId === id)
+          get().categories.some((c) => c.parentId === id) ||
+          get().promotions.some(
+            (p) => p.scope === 'category' && p.categoryId === id,
+          )
         )
           return false
         set((s) => ({ categories: s.categories.filter((c) => c.id !== id) }))
@@ -432,6 +480,84 @@ export const useAdminStore = create<AdminState>()(
         }))
         return true
       },
+      savePromotion: (input) => {
+        const current = get().promotions
+        const item = {
+          ...input,
+          id: input.id || newId('promo'),
+          code: couponCode(input.code),
+          categoryId: input.scope === 'all' ? '' : input.categoryId,
+        }
+        const error = promotionError(item, current, get().categories)
+        if (error) return error
+        set((s) => ({
+          promotions: s.promotions.some((p) => p.id === item.id)
+            ? s.promotions.map((p) => (p.id === item.id ? item : p))
+            : [item, ...s.promotions],
+        }))
+        return null
+      },
+      removePromotion: (id) =>
+        set((s) => ({ promotions: s.promotions.filter((p) => p.id !== id) })),
+      saveCampaign: (input) => {
+        const item = {
+          ...input,
+          id: input.id || newId('camp'),
+          title: input.title.trim(),
+          slug: campaignSlug(input.title),
+          description: input.description.trim(),
+        }
+        const error = campaignError(item, get().campaigns)
+        if (error) return error
+        set((s) => ({
+          campaigns: s.campaigns.some((p) => p.id === item.id)
+            ? s.campaigns.map((p) => (p.id === item.id ? item : p))
+            : [item, ...s.campaigns],
+        }))
+        return null
+      },
+      removeCampaign: (id) =>
+        set((s) => ({ campaigns: s.campaigns.filter((p) => p.id !== id) })),
+      saveBanner: (input) => {
+        const item = {
+          ...input,
+          id: input.id || newId('banner'),
+          headline: input.headline.trim(),
+          subtitle: input.subtitle.trim(),
+          ctaText: input.ctaText.trim(),
+          ctaHref: input.ctaHref.trim(),
+          imageUrl: input.imageUrl.trim(),
+        }
+        const error = bannerError(item)
+        if (error) return error
+        set((s) => ({
+          banners: s.banners.some((p) => p.id === item.id)
+            ? s.banners.map((p) => (p.id === item.id ? item : p))
+            : [item, ...s.banners],
+        }))
+        return null
+      },
+      removeBanner: (id) =>
+        set((s) => ({ banners: s.banners.filter((p) => p.id !== id) })),
+      saveCollection: (input) => {
+        const item = {
+          ...input,
+          id: input.id || newId('collection'),
+          title: input.title.trim(),
+          description: input.description.trim(),
+          productIds: [...input.productIds],
+        }
+        const error = collectionError(item, get().products, get().collections)
+        if (error) return error
+        set((s) => ({
+          collections: s.collections.some((p) => p.id === item.id)
+            ? s.collections.map((p) => (p.id === item.id ? item : p))
+            : [item, ...s.collections],
+        }))
+        return null
+      },
+      removeCollection: (id) =>
+        set((s) => ({ collections: s.collections.filter((p) => p.id !== id) })),
       resetPreview: () => set(base()),
     }),
     {
@@ -439,12 +565,35 @@ export const useAdminStore = create<AdminState>()(
       storage: createJSONStorage(() => localStorage),
       skipHydration: true,
       version: 1,
+      merge: (persisted, current) => {
+        const saved = (persisted ?? {}) as Partial<AdminState>
+        return {
+          ...current,
+          ...saved,
+          promotions: Array.isArray(saved.promotions)
+            ? saved.promotions
+            : current.promotions,
+          campaigns: Array.isArray(saved.campaigns)
+            ? saved.campaigns
+            : current.campaigns,
+          banners: Array.isArray(saved.banners)
+            ? saved.banners
+            : current.banners,
+          collections: Array.isArray(saved.collections)
+            ? saved.collections
+            : current.collections,
+        }
+      },
       partialize: (s) => ({
         products: s.products,
         categories: s.categories,
         orders: s.orders,
         customers: s.customers,
         stockEvents: s.stockEvents,
+        promotions: s.promotions,
+        campaigns: s.campaigns,
+        banners: s.banners,
+        collections: s.collections,
       }),
     },
   ),

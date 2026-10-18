@@ -29,6 +29,8 @@ Open <http://localhost:3000>. The root route opens the dashboard.
 - **Inventory:** simulate product or variant-level stock adjustments with a recent-activity list
 - **Orders:** itemized order details, forward-only fulfillment transitions, local shipment tracking, cancellation, return decisions, refund preview and activity timeline
 - **Customers:** view sample customer profiles and sales history
+- **Promotions:** locally manage coupons and marketing campaigns with USD discount previews
+- **Store content:** edit sample hero banners and featured product collections
 
 All UI text is English, and all displayed prices use USD. No special Bangladesh market mode exists.
 
@@ -38,10 +40,15 @@ This is a **frontend-only workspace**. It does not authenticate administrators, 
 
 Do not publicly deploy this preview as a functioning administration system. Real staff authentication, role-based access control, sensitive-data protection, audit logs, inventory integrity and payment administration require backend integration.
 
+## Promotions and content previews
+
+See [Merchandising workflows](docs/MERCHANDISING.md). Editing a banner or coupon never changes the public storefront.
+
 ## Quality checks
 
 ```powershell
 npm run verify
+npm run verify:merchandising
 npm run typecheck
 npm run lint
 npm run build

@@ -1,4 +1,13 @@
-import type { Category, Product, Customer, Order } from './types'
+import type {
+  Category,
+  Product,
+  Customer,
+  Order,
+  Promotion,
+  Campaign,
+  StoreBanner,
+  FeaturedCollection,
+} from './types'
 export const seedCategories: Category[] = [
   {
     id: 'cat-electronics',
@@ -289,3 +298,67 @@ export const seedOrders: Order[] = [
 ]
 export const orderTotal = (order: Order) =>
   order.items.reduce((sum, item) => sum + item.price * item.qty, 0)
+
+export const seedPromotions: Promotion[] = [
+  {
+    id: 'promo-welcome',
+    code: 'WELCOME10',
+    kind: 'percent',
+    value: 10,
+    minimumUsd: 50,
+    capUsd: 25,
+    limit: 100,
+    startDate: '2026-10-01',
+    endDate: '2027-12-31',
+    scope: 'all',
+    categoryId: '',
+    enabled: true,
+  },
+  {
+    id: 'promo-style',
+    code: 'STYLE15',
+    kind: 'fixed',
+    value: 15,
+    minimumUsd: 100,
+    capUsd: 0,
+    limit: 0,
+    startDate: '',
+    endDate: '',
+    scope: 'category',
+    categoryId: 'cat-fashion',
+    enabled: false,
+  },
+]
+export const seedCampaigns: Campaign[] = [
+  {
+    id: 'camp-autumn',
+    title: 'Autumn Essentials',
+    slug: 'autumn-essentials',
+    status: 'Draft',
+    startDate: '',
+    endDate: '',
+    description: 'Seasonal merchandising preview.',
+  },
+]
+export const seedBanners: StoreBanner[] = [
+  {
+    id: 'banner-discover',
+    headline: 'Discover your everyday essentials',
+    subtitle: 'Fresh finds across the store.',
+    ctaText: 'Shop all products',
+    ctaHref: '/shop',
+    imageUrl: '',
+    position: 1,
+    enabled: true,
+  },
+]
+export const seedCollections: FeaturedCollection[] = [
+  {
+    id: 'collection-featured',
+    title: 'Featured picks',
+    description: 'A small edit of standout products.',
+    productIds: ['p-101', 'p-102', 'p-103'],
+    position: 1,
+    enabled: true,
+  },
+]

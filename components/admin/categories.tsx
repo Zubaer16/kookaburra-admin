@@ -106,6 +106,7 @@ export function Categories() {
   const ready = useAdminReady(),
     categories = useAdminStore((s) => s.categories),
     products = useAdminStore((s) => s.products),
+    promotions = useAdminStore((s) => s.promotions),
     remove = useAdminStore((s) => s.deleteCategory)
   const [open, setOpen] = useState(false),
     [editing, setEditing] = useState<Category | undefined>()
@@ -137,7 +138,10 @@ export function Categories() {
           const children = categories.filter(
             (item) => item.parentId === c.id,
           ).length
-          const canRemove = count === 0 && children === 0
+          const linkedCoupons = promotions.filter(
+            (p) => p.scope === 'category' && p.categoryId === c.id,
+          ).length
+          const canRemove = count === 0 && children === 0 && linkedCoupons === 0
           return (
             <Panel key={c.id} className="p-5">
               <div className="flex items-start justify-between gap-2">
@@ -163,7 +167,7 @@ export function Categories() {
                     disabled={!canRemove}
                     title={
                       !canRemove
-                        ? 'Move products and subcategories first'
+                        ? 'Remove linked products, subcategories and scoped coupons first'
                         : 'Delete category'
                     }
                     onClick={() => {
@@ -187,7 +191,9 @@ export function Categories() {
               <div className="mt-5 flex items-center gap-2 border-t border-line pt-4 text-xs font-bold text-muted">
                 <Package size={15} />
                 {count} {count === 1 ? 'product' : 'products'}
-                <span className="ml-auto">{children} subcategories</span>
+                <span className="ml-auto">
+                  {children} subcategories · {linkedCoupons} coupons
+                </span>
               </div>
             </Panel>
           )

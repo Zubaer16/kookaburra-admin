@@ -13,7 +13,8 @@
     "test:e2e:visual": "node ./node_modules/playwright/cli.js test --headed --project=chromium --workers=1",
     "test:e2e": "node ./node_modules/playwright/cli.js test --project=chromium --workers=1",
     "test:e2e:report": "node ./node_modules/playwright/cli.js show-report",
-    "test:e2e:list": "node ./node_modules/playwright/cli.js test --list"
+    "test:e2e:list": "node ./node_modules/playwright/cli.js test --list",
+    "verify:merchandising": "node scripts/verify-merchandising.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",

@@ -93,3 +93,46 @@ export type StockEvent = {
   at: string
 }
 export type ProductInput = Omit<Product, 'id' | 'createdAt'>
+
+/** Marketing records are local-only editor previews, never live promotions. */
+export type Promotion = {
+  id: string
+  code: string
+  kind: 'percent' | 'fixed'
+  value: number
+  minimumUsd: number
+  capUsd: number
+  limit: number
+  startDate: string
+  endDate: string
+  scope: 'all' | 'category'
+  categoryId: string
+  enabled: boolean
+}
+export type Campaign = {
+  id: string
+  title: string
+  slug: string
+  status: 'Draft' | 'Scheduled' | 'Active' | 'Paused'
+  startDate: string
+  endDate: string
+  description: string
+}
+export type StoreBanner = {
+  id: string
+  headline: string
+  subtitle: string
+  ctaText: string
+  ctaHref: string
+  imageUrl: string
+  position: number
+  enabled: boolean
+}
+export type FeaturedCollection = {
+  id: string
+  title: string
+  description: string
+  productIds: string[]
+  position: number
+  enabled: boolean
+}

@@ -17,6 +17,8 @@ import {
   Globe2,
   ShieldCheck,
   RotateCcw,
+  BadgePercent,
+  Images,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAdminStore } from '@/lib/store'
@@ -28,6 +30,8 @@ const links = [
   { href: '/inventory', label: 'Inventory', icon: Boxes },
   { href: '/orders', label: 'Orders', icon: ShoppingCart },
   { href: '/customers', label: 'Customers', icon: Users },
+  { href: '/promotions', label: 'Promotions', icon: BadgePercent },
+  { href: '/content', label: 'Store content', icon: Images },
 ]
 function Logo() {
   return (
