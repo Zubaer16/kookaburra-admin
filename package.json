@@ -14,7 +14,8 @@
     "test:e2e": "node ./node_modules/playwright/cli.js test --project=chromium --workers=1",
     "test:e2e:report": "node ./node_modules/playwright/cli.js show-report",
     "test:e2e:list": "node ./node_modules/playwright/cli.js test --list",
-    "verify:merchandising": "node scripts/verify-merchandising.mjs"
+    "verify:merchandising": "node scripts/verify-merchandising.mjs",
+    "verify:commerce": "node scripts/verify-commerce.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",

@@ -362,3 +362,30 @@ export const seedCollections: FeaturedCollection[] = [
     enabled: true,
   },
 ]
+
+/** Illustrative settings only. Not shared with customer checkout. */
+export const seedShippingZones: import('./types').ShippingZone[] = [
+  {
+    id: 'zone-primary',
+    name: 'Core international destinations',
+    countries: ['United States', 'United Kingdom', 'Canada', 'Other country'],
+    enabled: true,
+    services: [
+      {
+        kind: 'standard',
+        feeUsd: 18,
+        freeOverUsd: 0,
+        etaNote: 'Timing to be confirmed',
+        enabled: true,
+      },
+      {
+        kind: 'express',
+        feeUsd: 35,
+        freeOverUsd: 0,
+        etaNote: 'Availability to be confirmed',
+        enabled: true,
+      },
+    ],
+  },
+]
+export const seedTaxRules: import('./types').TaxRule[] = []

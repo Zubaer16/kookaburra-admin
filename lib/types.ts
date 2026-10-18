@@ -136,3 +136,26 @@ export type FeaturedCollection = {
   position: number
   enabled: boolean
 }
+
+/** Draft storefront delivery/tax policy. Never interpreted as live checkout eligibility. */
+export type ShippingService = {
+  kind: 'standard' | 'express'
+  feeUsd: number
+  freeOverUsd: number
+  etaNote: string
+  enabled: boolean
+}
+export type ShippingZone = {
+  id: string
+  name: string
+  countries: string[]
+  enabled: boolean
+  services: ShippingService[]
+}
+export type TaxRule = {
+  id: string
+  country: string
+  ratePercent: number
+  note: string
+  enabled: boolean
+}

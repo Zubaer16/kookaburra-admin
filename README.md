@@ -31,6 +31,8 @@ Open <http://localhost:3000>. The root route opens the dashboard.
 - **Customers:** view sample customer profiles and sales history
 - **Promotions:** locally manage coupons and marketing campaigns with USD discount previews
 - **Store content:** edit sample hero banners and featured product collections
+- **Shipping & taxes:** configure local-only international zones, sample rates, thresholds and illustrative tax rules
+- **Payment reporting:** search/filter read-only, fictional payment examples; never real Stripe transactions
 
 All UI text is English, and all displayed prices use USD. No special Bangladesh market mode exists.
 
@@ -44,11 +46,16 @@ Do not publicly deploy this preview as a functioning administration system. Real
 
 See [Merchandising workflows](docs/MERCHANDISING.md). Editing a banner or coupon never changes the public storefront.
 
+## Shipping and payments preview
+
+See [shipping, tax and payment contract notes](docs/SHIPPING_PAYMENT_PREVIEWS.md) and the [two-frontend compatibility audit](docs/CROSS_FRONTEND_ALIGNMENT.md). Admin preview policies are **not transmitted to the Storefront**, whose checkout still uses fixed sample fees.
+
 ## Quality checks
 
 ```powershell
 npm run verify
 npm run verify:merchandising
+npm run verify:commerce
 npm run typecheck
 npm run lint
 npm run build

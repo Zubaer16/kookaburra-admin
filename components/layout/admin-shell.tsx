@@ -19,6 +19,8 @@ import {
   RotateCcw,
   BadgePercent,
   Images,
+  Truck,
+  CreditCard,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAdminStore } from '@/lib/store'
@@ -32,6 +34,8 @@ const links = [
   { href: '/customers', label: 'Customers', icon: Users },
   { href: '/promotions', label: 'Promotions', icon: BadgePercent },
   { href: '/content', label: 'Store content', icon: Images },
+  { href: '/shipping', label: 'Shipping & taxes', icon: Truck },
+  { href: '/payments', label: 'Payments', icon: CreditCard },
 ]
 function Logo() {
   return (
@@ -54,7 +58,7 @@ function Sidebar({ close }: { close?: () => void }) {
   const pathname = usePathname()
   const reset = useAdminStore((s) => s.resetPreview)
   return (
-    <div className="flex h-full flex-col bg-white px-5 py-6">
+    <div className="flex h-full flex-col overflow-y-auto bg-white px-5 py-6">
       <Logo />
       <div className="mt-11 px-3 text-[11px] font-extrabold uppercase tracking-[.18em] text-slate-400">
         Workspace

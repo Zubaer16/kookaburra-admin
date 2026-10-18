@@ -14,6 +14,8 @@ import type {
   Campaign,
   StoreBanner,
   FeaturedCollection,
+  ShippingZone,
+  TaxRule,
 } from './types'
 import {
   canAdvanceStatus,
@@ -23,6 +25,7 @@ import {
   canDecideReturn,
   validRefund,
 } from './order-workflow'
+import { shippingZoneError, taxRuleError } from './commerce-policy'
 import {
   promotionError,
   campaignError,
@@ -41,6 +44,8 @@ import {
   seedCampaigns,
   seedBanners,
   seedCollections,
+  seedShippingZones,
+  seedTaxRules,
   seedCategories,
   seedProducts,
   seedCustomers,
@@ -57,6 +62,12 @@ type AdminState = {
   campaigns: Campaign[]
   banners: StoreBanner[]
   collections: FeaturedCollection[]
+  shippingZones: ShippingZone[]
+  taxRules: TaxRule[]
+  saveShippingZone: (input: ShippingZone) => string | null
+  removeShippingZone: (id: string) => void
+  saveTaxRule: (input: TaxRule) => string | null
+  removeTaxRule: (id: string) => void
   savePromotion: (item: Promotion) => string | null
   removePromotion: (id: string) => void
   saveCampaign: (item: Campaign) => string | null
@@ -117,6 +128,12 @@ const base = () => ({
     ...c,
     productIds: [...c.productIds],
   })),
+  shippingZones: seedShippingZones.map((z) => ({
+    ...z,
+    countries: [...z.countries],
+    services: z.services.map((s) => ({ ...s })),
+  })),
+  taxRules: seedTaxRules.map((r) => ({ ...r })),
 })
 function sanitizeProduct(input: ProductInput): ProductInput {
   const variants =
@@ -558,6 +575,47 @@ export const useAdminStore = create<AdminState>()(
       },
       removeCollection: (id) =>
         set((s) => ({ collections: s.collections.filter((p) => p.id !== id) })),
+      saveShippingZone: (input) => {
+        const zone = {
+          ...input,
+          id: input.id || newId('zone'),
+          name: input.name.trim(),
+          countries: [...input.countries],
+          services: input.services.map((s) => ({
+            ...s,
+            etaNote: s.etaNote.trim(),
+          })),
+        }
+        const error = shippingZoneError(zone, get().shippingZones)
+        if (error) return error
+        set((s) => ({
+          shippingZones: s.shippingZones.some((z) => z.id === zone.id)
+            ? s.shippingZones.map((z) => (z.id === zone.id ? zone : z))
+            : [...s.shippingZones, zone],
+        }))
+        return null
+      },
+      removeShippingZone: (id) =>
+        set((s) => ({
+          shippingZones: s.shippingZones.filter((z) => z.id !== id),
+        })),
+      saveTaxRule: (input) => {
+        const rule = {
+          ...input,
+          id: input.id || newId('tax'),
+          note: input.note.trim(),
+        }
+        const error = taxRuleError(rule, get().taxRules)
+        if (error) return error
+        set((s) => ({
+          taxRules: s.taxRules.some((r) => r.id === rule.id)
+            ? s.taxRules.map((r) => (r.id === rule.id ? rule : r))
+            : [...s.taxRules, rule],
+        }))
+        return null
+      },
+      removeTaxRule: (id) =>
+        set((s) => ({ taxRules: s.taxRules.filter((r) => r.id !== id) })),
       resetPreview: () => set(base()),
     }),
     {
@@ -582,6 +640,12 @@ export const useAdminStore = create<AdminState>()(
           collections: Array.isArray(saved.collections)
             ? saved.collections
             : current.collections,
+          shippingZones: Array.isArray(saved.shippingZones)
+            ? saved.shippingZones
+            : current.shippingZones,
+          taxRules: Array.isArray(saved.taxRules)
+            ? saved.taxRules
+            : current.taxRules,
         }
       },
       partialize: (s) => ({
@@ -594,6 +658,8 @@ export const useAdminStore = create<AdminState>()(
         campaigns: s.campaigns,
         banners: s.banners,
         collections: s.collections,
+        shippingZones: s.shippingZones,
+        taxRules: s.taxRules,
       }),
     },
   ),
