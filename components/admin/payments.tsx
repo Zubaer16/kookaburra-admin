@@ -130,7 +130,12 @@ export function Payments() {
           </Field>
         </div>
         {filtered.length ? (
-          <div className="overflow-x-auto">
+          <div
+            className="overflow-x-auto"
+            tabIndex={0}
+            role="region"
+            aria-label="Payment reports table (scroll horizontally for more columns)"
+          >
             <table className="w-full min-w-[720px] text-left text-sm">
               <thead className="bg-slate-50 text-xs font-bold uppercase text-muted">
                 <tr>

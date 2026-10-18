@@ -21,7 +21,7 @@ export function Modal({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[80] bg-slate-950/50 data-[state=open]:animate-in" />
         <Dialog.Content
-          className={`fixed left-1/2 top-1/2 z-[90] max-h-[88vh] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl focus:outline-none ${wide ? 'w-[min(95vw,920px)]' : 'w-[min(94vw,560px)]'}`}
+          className={`fixed left-1/2 top-1/2 z-[90] max-h-[calc(100dvh-1.5rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl sm:p-6 focus:outline-none ${wide ? 'w-[min(calc(100vw-1.5rem),920px)]' : 'w-[min(calc(100vw-1.5rem),560px)]'}`}
         >
           <Dialog.Title className="text-xl font-extrabold tracking-tight">
             {title}
@@ -30,7 +30,7 @@ export function Modal({
             {description ?? 'Edit the details below.'}
           </Dialog.Description>
           <Dialog.Close
-            className="absolute right-4 top-4 flex size-9 items-center justify-center rounded-lg hover:bg-slate-100"
+            className="absolute right-4 top-4 flex size-9 items-center justify-center rounded-lg hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-primary"
             aria-label="Close dialog"
           >
             <X size={18} />

@@ -118,7 +118,12 @@ export function Products() {
           </span>
           <span>All prices in USD · Browser preview</span>
         </div>
-        <div className="table-scroll">
+        <div
+          className="table-scroll"
+          tabIndex={0}
+          role="region"
+          aria-label="Products table (scroll horizontally for more columns)"
+        >
           <table className="admin-table">
             <thead>
               <tr>

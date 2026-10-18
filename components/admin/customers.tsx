@@ -36,7 +36,12 @@ export function Customers() {
             />
           </label>
         </div>
-        <div className="table-scroll">
+        <div
+          className="table-scroll"
+          tabIndex={0}
+          role="region"
+          aria-label="Customers table (scroll horizontally for more columns)"
+        >
           <table className="admin-table">
             <thead>
               <tr>

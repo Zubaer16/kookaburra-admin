@@ -151,7 +151,12 @@ export function Staff() {
             </Button>
           </div>
           {filtered.length ? (
-            <div className="overflow-x-auto">
+            <div
+              className="overflow-x-auto"
+              tabIndex={0}
+              role="region"
+              aria-label="Staff roles and permissions table (scroll horizontally for more columns)"
+            >
               <table className="w-full min-w-[700px] text-left text-sm">
                 <thead className="bg-slate-50 text-xs uppercase text-muted">
                   <tr>

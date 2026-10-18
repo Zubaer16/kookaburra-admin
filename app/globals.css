@@ -112,3 +112,16 @@ input[type='number'] {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Keep narrow tables usable with keyboard and on small screens. */
+.table-scroll:focus-visible,
+[data-table-scroll]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+@media (max-width: 639px) {
+  .admin-table th,
+  .admin-table td {
+    padding: 12px 13px;
+  }
+}

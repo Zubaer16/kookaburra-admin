@@ -17,7 +17,8 @@
     "verify:merchandising": "node scripts/verify-merchandising.mjs",
     "verify:commerce": "node scripts/verify-commerce.mjs",
     "verify:workspace": "node scripts/verify-workspace.mjs",
-    "verify:reports": "node scripts/verify-reports.mjs"
+    "verify:reports": "node scripts/verify-reports.mjs",
+    "verify:ui": "node scripts/verify-ui.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",

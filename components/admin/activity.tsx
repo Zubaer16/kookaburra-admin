@@ -73,7 +73,12 @@ export function Activity() {
           </Field>
         </div>
         {results.length ? (
-          <div className="overflow-x-auto">
+          <div
+            className="overflow-x-auto"
+            tabIndex={0}
+            role="region"
+            aria-label="Activity history table (scroll horizontally for more columns)"
+          >
             <table className="min-w-[650px] w-full text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase text-muted">
                 <tr>

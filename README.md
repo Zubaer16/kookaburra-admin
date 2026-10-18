@@ -57,6 +57,10 @@ See [shipping, tax and payment contract notes](docs/SHIPPING_PAYMENT_PREVIEWS.md
 
 See [workspace previews](docs/WORKSPACE_PREVIEWS.md). Role editing does not secure the Admin. Local activity is not a real audit trail.
 
+## UI and keyboard QA (Patch 08)
+
+Mobile admin navigation now uses an accessible dialog with Escape/focus return. Use **Ctrl+K** (or **Command+K** on Mac) to open searchable quick navigation, with arrow keys and Enter to select a section. Report tabs support arrow keys, Home and End. Long tables can be focused to scroll with the keyboard. See [Admin UI QA checklist](docs/ADMIN_UI_QA.md) for manual checks and limitations.
+
 ## Quality checks
 
 ```powershell
@@ -64,10 +68,12 @@ npm run verify
 npm run verify:merchandising
 npm run verify:commerce
 npm run verify:workspace
+npm run verify:reports
+npm run verify:ui
 npm run typecheck
 npm run lint
 npm run build
-# Or run all four with:
+# Verify project structure, typecheck, lint and build with:
 npm run check
 ```
 

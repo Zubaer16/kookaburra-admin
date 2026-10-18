@@ -244,7 +244,12 @@ export function Dashboard() {
             }
           />
         </div>
-        <div className="table-scroll">
+        <div
+          className="table-scroll"
+          tabIndex={0}
+          role="region"
+          aria-label="Recent orders table (scroll horizontally for more columns)"
+        >
           <table className="admin-table">
             <thead>
               <tr>

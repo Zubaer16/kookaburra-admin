@@ -1,5 +1,5 @@
 'use client'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { BarChart3, Download, AlertTriangle, RotateCcw } from 'lucide-react'
 import { PageHeading } from './page-heading'
 import { Panel, EmptyState, SectionHeading } from '@/components/ui/panel'
@@ -90,6 +90,7 @@ export function Reports() {
   const customers = useAdminStore((s) => s.customers)
   const stockEvents = useAdminStore((s) => s.stockEvents)
   const [view, setView] = useState<ReportView>('sales')
+  const tabs = useRef<(HTMLButtonElement | null)[]>([])
   const [period, setPeriod] = useState<ReportPeriod>('all')
   const [from, setFrom] = useState('2026-10-01')
   const [to, setTo] = useState('2026-10-18')
@@ -110,6 +111,19 @@ export function Reports() {
       : view === 'customers'
         ? data.customers.length
         : data.products.length
+  function onTabKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
+    const keys: Record<string, number> = {
+      ArrowRight: (index + 1) % views.length,
+      ArrowLeft: (index - 1 + views.length) % views.length,
+      Home: 0,
+      End: views.length - 1,
+    }
+    const next = keys[event.key]
+    if (next === undefined) return
+    event.preventDefault()
+    setView(views[next].id)
+    tabs.current[next]?.focus()
+  }
   function exportCurrent() {
     if (error) return
     const csv = reportCsv(view, data)
@@ -221,7 +235,7 @@ export function Reports() {
         role="tablist"
         aria-label="Report views"
       >
-        {views.map(({ id, title }) => (
+        {views.map(({ id, title }, index) => (
           <button
             key={id}
             id={`report-tab-${id}`}
@@ -229,6 +243,9 @@ export function Reports() {
             role="tab"
             aria-controls="report-panel"
             aria-selected={view === id}
+            tabIndex={view === id ? 0 : -1}
+            ref={(el) => { tabs.current[index] = el }}
+            onKeyDown={(event) => onTabKeyDown(event, index)}
             className={`rounded-xl px-4 py-2.5 text-sm font-bold transition ${view === id ? 'bg-blue-600 text-white' : 'border border-line bg-white text-ink hover:bg-slate-50'}`}
             onClick={() => setView(id)}
           >
@@ -304,7 +321,7 @@ export function Reports() {
                   subtitle="Export this filtered selection as CSV"
                 />
               </div>
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Sample order ledger table (scroll horizontally for more columns)">
                 <table className="min-w-[680px] w-full text-left">
                   <thead className="bg-slate-50">
                     <tr>
@@ -366,7 +383,7 @@ export function Reports() {
                   subtitle="Item quantities and order value across selected non-cancelled orders"
                 />
               </div>
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Product performance table (scroll horizontally for more columns)">
                 <table className="w-full min-w-[720px] text-left">
                   <thead className="bg-slate-50">
                     <tr>
@@ -425,7 +442,7 @@ export function Reports() {
                   subtitle="Current balances; not restricted by order date filter"
                 />
               </div>
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Stock position table (scroll horizontally for more columns)">
                 <table className="min-w-[620px] w-full text-left">
                   <thead className="bg-slate-50">
                     <tr>
@@ -515,7 +532,7 @@ export function Reports() {
                   subtitle="No live customer database or real payment history"
                 />
               </div>
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Customer insights table (scroll horizontally for more columns)">
                 <table className="min-w-[720px] w-full text-left">
                   <thead className="bg-slate-50">
                     <tr>

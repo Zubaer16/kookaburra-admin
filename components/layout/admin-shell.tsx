@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import * as Dialog from '@radix-ui/react-dialog'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -9,7 +10,6 @@ import {
   Boxes,
   ShoppingCart,
   Users,
-  Search,
   Menu,
   X,
   ChevronRight,
@@ -29,6 +29,7 @@ import {
 import { cn } from '@/lib/utils'
 import { useAdminStore } from '@/lib/store'
 import { Button } from '@/components/ui/button'
+import { QuickNavigation } from './quick-navigation'
 const links = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
   { href: '/products', label: 'Products', icon: Package },
@@ -121,93 +122,78 @@ function Sidebar({ close }: { close?: () => void }) {
   )
 }
 export function AdminShell({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useState(false),
-    [searchOpen, setSearchOpen] = useState(false)
+  const [open, setOpen] = useState(false)
   const pathname = usePathname()
   useEffect(() => {
     setOpen(false)
   }, [pathname])
   useEffect(() => {
-    if (!open) return
-    const fn = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false)
+    const desktop = window.matchMedia('(min-width: 1024px)')
+    const onResize = (event: MediaQueryListEvent) => {
+      if (event.matches) setOpen(false)
     }
-    window.addEventListener('keydown', fn)
-    return () => window.removeEventListener('keydown', fn)
-  }, [open])
+    desktop.addEventListener('change', onResize)
+    return () => desktop.removeEventListener('change', onResize)
+  }, [])
   return (
     <div className="min-h-screen lg:pl-[254px]">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[100] focus:rounded-lg focus:bg-white focus:px-4 focus:py-3 focus:font-bold focus:text-primary focus:shadow-xl"
+      >
+        Skip to main content
+      </a>
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[254px] border-r border-line bg-white lg:block">
         <Sidebar />
       </aside>
-      {open && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <button
-            aria-label="Close navigation"
-            className="absolute inset-0 bg-slate-950/40"
-            onClick={() => setOpen(false)}
-          />
-          <aside className="relative h-full w-[min(84vw,270px)] shadow-2xl">
-            <Sidebar close={() => setOpen(false)} />
-            <button
-              aria-label="Close navigation"
-              onClick={() => setOpen(false)}
-              className="absolute right-3 top-4 rounded-lg bg-white p-2"
-            >
-              <X size={18} />
-            </button>
-          </aside>
-        </div>
-      )}
       <header className="sticky top-0 z-20 flex h-[76px] items-center gap-3 border-b border-line bg-white/95 px-4 backdrop-blur sm:px-8">
-        <button
-          className="rounded-xl p-2 hover:bg-slate-100 lg:hidden"
-          aria-label="Open navigation"
-          onClick={() => setOpen(true)}
-        >
-          <Menu size={22} />
-        </button>
+        <Dialog.Root open={open} onOpenChange={setOpen}>
+          <Dialog.Trigger asChild>
+            <button
+              type="button"
+              className="rounded-xl p-2 hover:bg-slate-100 lg:hidden"
+              aria-label="Open navigation"
+            >
+              <Menu size={22} />
+            </button>
+          </Dialog.Trigger>
+          <Dialog.Portal>
+            <Dialog.Overlay className="fixed inset-0 z-40 bg-slate-950/40 lg:hidden" />
+            <Dialog.Content className="fixed inset-y-0 left-0 z-50 w-[min(84vw,280px)] overflow-hidden bg-white shadow-2xl focus:outline-none lg:hidden">
+              <Dialog.Title className="sr-only">Admin navigation</Dialog.Title>
+              <Dialog.Description className="sr-only">
+                Choose a section of the admin preview workspace.
+              </Dialog.Description>
+              <Sidebar close={() => setOpen(false)} />
+              <Dialog.Close
+                aria-label="Close navigation"
+                className="absolute right-3 top-4 rounded-lg bg-white p-2 hover:bg-slate-100"
+              >
+                <X size={18} />
+              </Dialog.Close>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
         <div className="hidden items-center gap-2 text-sm text-muted sm:flex">
-          <Globe2 size={16} />
+          <Globe2 size={16} aria-hidden="true" />
           <span>Global Store</span>
-          <ChevronRight size={14} />
-          <span className="font-bold capitalize text-ink">
-            {pathname.split('/')[1] || 'Overview'}
+          <ChevronRight size={14} aria-hidden="true" />
+          <span
+            className="font-bold capitalize text-ink"
+            aria-current="location"
+          >
+            {links.find(({ href }) => pathname === href)?.label ??
+              pathname.split('/')[1] ??
+              'Overview'}
           </span>
         </div>
         <div className="ml-auto flex items-center gap-3">
-          <div className="hidden items-center gap-2 rounded-xl border border-line px-3 py-2 text-muted md:flex">
-            <Search size={16} />
-            {searchOpen ? (
-              <input
-                autoFocus
-                className="w-40 bg-transparent text-sm outline-none"
-                aria-label="Quick navigation"
-                placeholder="Type a section..."
-                onKeyDown={(e) => {
-                  if (e.key === 'Escape') setSearchOpen(false)
-                  if (e.key === 'Enter') {
-                    const target = links.find((l) =>
-                      l.label
-                        .toLowerCase()
-                        .includes(e.currentTarget.value.toLowerCase()),
-                    )
-                    if (target) {
-                      window.location.href = target.href
-                    }
-                  }
-                }}
-              />
-            ) : (
-              <button onClick={() => setSearchOpen(true)} className="text-xs">
-                Jump to section
-              </button>
-            )}
-          </div>
+          <QuickNavigation links={links} />
           <span className="hidden rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 sm:inline-flex">
             USD only
           </span>
           <button
+            type="button"
             aria-label="Notifications unavailable in preview"
             title="Notifications will be connected to the backend later"
             disabled
@@ -225,6 +211,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       </header>
       <main
         id="main-content"
+        tabIndex={-1}
         className="mx-auto max-w-[1550px] px-4 pb-14 pt-7 sm:px-8 sm:pt-9"
       >
         {children}

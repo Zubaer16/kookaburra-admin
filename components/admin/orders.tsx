@@ -90,7 +90,12 @@ export function Orders() {
             ))}
           </select>
         </div>
-        <div className="table-scroll">
+        <div
+          className="table-scroll"
+          tabIndex={0}
+          role="region"
+          aria-label="Orders table (scroll horizontally for more columns)"
+        >
           <table className="admin-table">
             <thead>
               <tr>
