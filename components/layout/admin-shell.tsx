@@ -24,6 +24,7 @@ import {
   UserRoundCog,
   Settings2,
   ClipboardList,
+  ChartNoAxesCombined,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAdminStore } from '@/lib/store'
@@ -39,6 +40,7 @@ const links = [
   { href: '/content', label: 'Store content', icon: Images },
   { href: '/shipping', label: 'Shipping & taxes', icon: Truck },
   { href: '/payments', label: 'Payments', icon: CreditCard },
+  { href: '/reports', label: 'Reports', icon: ChartNoAxesCombined },
   { href: '/staff', label: 'Staff & roles', icon: UserRoundCog },
   { href: '/settings', label: 'Store settings', icon: Settings2 },
   { href: '/activity', label: 'Activity preview', icon: ClipboardList },

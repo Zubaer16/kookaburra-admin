@@ -101,3 +101,7 @@ See [Order workflows](docs/ORDER_WORKFLOWS.md) for fulfillment transitions, ship
 ## Catalog workflow details
 
 See [Catalog workflows](docs/CATALOG_WORKFLOWS.md) for product variants, SKU validation, hierarchy and media reference behavior.
+
+## Analytics & reports preview (Patch 07)
+
+Open `/reports` for Sales & Orders, Product Performance, Inventory and Customer Insights. Date-range filters support all dates, latest 7/30 sample-order days and custom dates. Export the selected preview table as a CSV on your device. Reports are derived from browser-local records, **not real paid sales**. Verify calculations with `npm run verify:reports`. See [Reports preview contract](docs/REPORTS_PREVIEW.md).
