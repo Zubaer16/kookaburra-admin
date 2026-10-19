@@ -12,7 +12,7 @@ test('create a product with size/color variant SKUs and image reference', async 
   )
   await fill(
     page,
-    page.getByRole('textbox', { name: 'Product name' }),
+    page.getByRole('textbox', { name: 'Product name', exact: true }),
     'Trail Everyday Hoodie',
     'Enter name',
   )
@@ -30,7 +30,7 @@ test('create a product with size/color variant SKUs and image reference', async 
   )
   await fill(
     page,
-    page.getByRole('spinbutton', { name: 'Price (USD)' }),
+    page.getByRole('spinbutton', { name: 'Price (USD)', exact: true }),
     '64',
     'Enter USD price',
   )
@@ -132,7 +132,7 @@ test('duplicate variant SKU and duplicate color/size are rejected', async ({
   )
   await fill(
     page,
-    page.getByRole('textbox', { name: 'Product name' }),
+    page.getByRole('textbox', { name: 'Product name', exact: true }),
     'Another Product',
     'Set product name',
   )
@@ -144,7 +144,7 @@ test('duplicate variant SKU and duplicate color/size are rejected', async ({
   )
   await fill(
     page,
-    page.getByRole('spinbutton', { name: 'Price (USD)' }),
+    page.getByRole('spinbutton', { name: 'Price (USD)', exact: true }),
     '20',
     'Set price',
   )

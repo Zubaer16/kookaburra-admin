@@ -51,6 +51,7 @@ import {
 import {
   stockOf,
   productValidationError,
+  productSlug,
   categoryParentWouldCycle,
 } from './catalog'
 import {
@@ -188,6 +189,9 @@ function sanitizeProduct(input: ProductInput): ProductInput {
   return {
     ...input,
     name: input.name.trim(),
+    slug: productSlug(input.slug || input.name),
+    description: (input.description ?? '').trim(),
+    badge: (input.badge ?? '').trim(),
     sku: input.sku.trim(),
     variants,
     images,

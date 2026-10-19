@@ -1,5 +1,18 @@
 import type { Category, Product, ProductInput } from './types'
 
+/** Public slugs remain independent of local numeric or demo product IDs. */
+export function productSlug(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+export function effectiveProductSlug(
+  product: Pick<Product, 'slug' | 'name'>,
+): string {
+  return productSlug(product.slug || product.name)
+}
 export function stockOf(product: Product): number {
   return product.variants?.length
     ? product.variants.reduce((total, variant) => total + variant.stock, 0)
@@ -60,6 +73,23 @@ export function productValidationError(
     !input.categoryId
   )
     return 'Enter a product name, base SKU, category, positive price and valid stock.'
+  const slug = effectiveProductSlug(input)
+  if (!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug))
+    return 'Enter a valid product slug.'
+  if (
+    products.some((p) => p.id !== editingId && effectiveProductSlug(p) === slug)
+  )
+    return 'This product URL slug is already used.'
+  if (
+    input.compareAt !== undefined &&
+    (!Number.isFinite(input.compareAt) || input.compareAt <= input.price)
+  )
+    return 'Compare-at price must exceed the selling price.'
+  if (
+    (input.badge ?? '').length > 45 ||
+    (input.description ?? '').length > 3000
+  )
+    return 'Product badge or description is too long.'
   const used = new Set<string>()
   for (const product of products) {
     if (product.id === editingId) continue
@@ -75,12 +105,11 @@ export function productValidationError(
   for (const variant of input.variants ?? []) {
     if (
       !variant.sku.trim() ||
-      !variant.color.trim() ||
-      !variant.size.trim() ||
+      (!variant.color.trim() && !variant.size.trim()) ||
       !Number.isInteger(variant.stock) ||
       variant.stock < 0
     )
-      return 'Every variant needs a SKU, size, color and valid stock quantity.'
+      return 'Every variant needs a SKU, a size or color option, and valid stock.'
     const sku = variant.sku.trim().toLowerCase()
     if (used.has(sku)) return 'Every base and variant SKU must be unique.'
     used.add(sku)

@@ -28,7 +28,7 @@ test('create, edit and remove a product in local preview', async ({ page }) => {
   )
   await fill(
     page,
-    page.getByRole('textbox', { name: 'Product name' }),
+    page.getByRole('textbox', { name: 'Product name', exact: true }),
     'Test Trail Backpack',
     'Enter product name',
   )
@@ -40,7 +40,7 @@ test('create, edit and remove a product in local preview', async ({ page }) => {
   )
   await fill(
     page,
-    page.getByRole('spinbutton', { name: 'Price (USD)' }),
+    page.getByRole('spinbutton', { name: 'Price (USD)', exact: true }),
     '47',
     'Enter USD price',
   )
@@ -63,7 +63,7 @@ test('create, edit and remove a product in local preview', async ({ page }) => {
   )
   await fill(
     page,
-    page.getByRole('textbox', { name: 'Product name' }),
+    page.getByRole('textbox', { name: 'Product name', exact: true }),
     'Test Trail Backpack Plus',
     'Rename product',
   )

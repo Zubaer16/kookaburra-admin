@@ -111,3 +111,9 @@ See [Catalog workflows](docs/CATALOG_WORKFLOWS.md) for product variants, SKU val
 ## Analytics & reports preview (Patch 07)
 
 Open `/reports` for Sales & Orders, Product Performance, Inventory and Customer Insights. Date-range filters support all dates, latest 7/30 sample-order days and custom dates. Export the selected preview table as a CSV on your device. Reports are derived from browser-local records, **not real paid sales**. Verify calculations with `npm run verify:reports`. See [Reports preview contract](docs/REPORTS_PREVIEW.md).
+
+## Compatibility alignment (Admin Patch 09)
+
+The `/alignment` page compares the current browser-local Admin catalog to a **snapshot** of the customer Storefront's sample categories and products. The Product Editor includes new optional Storefront metadata and flexible color-only/size-only variants; legacy order lines can carry optional variant references. No IDs, selling prices, quantities or historical order details are auto-migrated. **Admin edits still do not publish to Customer Storefront.**
+
+Run `npm run verify:alignment`, then `npm run check` and `npm run test:e2e:visual`. See `docs/COMPATIBILITY_PATCH09.md` for the unresolved backend decisions and mapping warnings.

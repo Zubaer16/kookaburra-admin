@@ -42,6 +42,7 @@ const links = [
   { href: '/shipping', label: 'Shipping & taxes', icon: Truck },
   { href: '/payments', label: 'Payments', icon: CreditCard },
   { href: '/reports', label: 'Reports', icon: ChartNoAxesCombined },
+  { href: '/alignment', label: 'Compatibility review', icon: ClipboardList },
   { href: '/staff', label: 'Staff & roles', icon: UserRoundCog },
   { href: '/settings', label: 'Store settings', icon: Settings2 },
   { href: '/activity', label: 'Activity preview', icon: ClipboardList },

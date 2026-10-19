@@ -21,13 +21,13 @@ function load(file, requireModule = () => ({})) {
     0,
     `Parsing ${file}`,
   )
-  const module = { exports: {} }
+  const compiledModule = { exports: {} }
   new Function('require', 'module', 'exports', output.outputText)(
     requireModule,
-    module,
-    module.exports,
+    compiledModule,
+    compiledModule.exports,
   )
-  return module.exports
+  return compiledModule.exports
 }
 const catalog = load('lib/catalog.ts')
 const m = load('lib/merchandising.ts', (id) => {

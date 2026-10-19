@@ -15,9 +15,12 @@ assert.equal(
     .length ?? 0,
   0,
 )
-const module = { exports: {} }
-new Function('module', 'exports', result.outputText)(module, module.exports)
-const x = module.exports
+const compiledModule = { exports: {} }
+new Function('module', 'exports', result.outputText)(
+  compiledModule,
+  compiledModule.exports,
+)
+const x = compiledModule.exports
 assert.equal(x.staffRoles.length, 5)
 assert.equal(x.allPermissions.length, 11)
 assert.equal(x.seedRolePermissions.Owner.length, x.allPermissions.length)

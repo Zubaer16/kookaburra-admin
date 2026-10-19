@@ -24,6 +24,12 @@ export type Product = {
   stock: number
   status: ProductStatus
   color: string
+  /** Optional storefront editorial fields. Existing local previews may not contain these. */
+  slug?: string
+  description?: string
+  compareAt?: number
+  badge?: string
+  tag?: 'new' | 'popular' | 'sale'
   createdAt: string
   variants?: ProductVariant[]
   images?: ProductMedia[]
@@ -73,7 +79,16 @@ export type RefundRecord = {
 export type Order = {
   id: string
   customerId: string
-  items: { productId: string; name: string; qty: number; price: number }[]
+  items: {
+    productId: string
+    /** Optional for legacy local orders; required for real variant-specific orders. */
+    variantId?: string | null
+    sku?: string
+    optionSnapshot?: Record<string, string>
+    name: string
+    qty: number
+    price: number
+  }[]
   status: OrderStatus
   createdAt: string
   channel: 'Web' | 'Mobile'

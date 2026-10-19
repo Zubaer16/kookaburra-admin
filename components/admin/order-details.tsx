@@ -39,6 +39,7 @@ export function OrderDetails({
 }) {
   const orders = useAdminStore((s) => s.orders)
   const customers = useAdminStore((s) => s.customers)
+  const products = useAdminStore((s) => s.products)
   const advance = useAdminStore((s) => s.updateOrderStatus)
   const saveShipment = useAdminStore((s) => s.saveShipment)
   const cancelOrder = useAdminStore((s) => s.cancelOrder)
@@ -149,6 +150,23 @@ export function OrderDetails({
               >
                 <div>
                   <p className="font-semibold">{item.name}</p>
+                  {item.variantId ? (
+                    <p className="mt-1 text-xs text-muted">
+                      Variant: {item.variantId}
+                      {item.sku ? ` · SKU: ${item.sku}` : ''}
+                      {item.optionSnapshot &&
+                      Object.keys(item.optionSnapshot).length
+                        ? ` · ${Object.entries(item.optionSnapshot)
+                            .map(([key, val]) => `${key}: ${val}`)
+                            .join(', ')}`
+                        : ''}
+                    </p>
+                  ) : products.find((p) => p.id === item.productId)?.variants
+                      ?.length ? (
+                    <p className="mt-1 text-xs text-amber-700">
+                      Variant identity not recorded in this legacy sample order.
+                    </p>
+                  ) : null}
                   <p className="text-xs text-muted">
                     Qty: {item.qty} · {money(item.price)} each
                   </p>

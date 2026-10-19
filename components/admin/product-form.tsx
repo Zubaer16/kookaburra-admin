@@ -5,6 +5,7 @@ import { useAdminStore } from '@/lib/store'
 import {
   categoryPath,
   mediaUrlIsSafe,
+  effectiveProductSlug,
   productValidationError,
 } from '@/lib/catalog'
 import type {
@@ -30,6 +31,13 @@ export function ProductForm({
   const editProduct = useAdminStore((s) => s.editProduct)
   const [name, setName] = useState(initial?.name ?? '')
   const [sku, setSku] = useState(initial?.sku ?? '')
+  const [slug, setSlug] = useState(initial ? effectiveProductSlug(initial) : '')
+  const [description, setDescription] = useState(initial?.description ?? '')
+  const [compareAt, setCompareAt] = useState(
+    initial?.compareAt === undefined ? '' : String(initial.compareAt),
+  )
+  const [badge, setBadge] = useState(initial?.badge ?? '')
+  const [tag, setTag] = useState<Product['tag'] | ''>(initial?.tag ?? '')
   const [categoryId, setCategoryId] = useState(
     initial?.categoryId ?? categories[0]?.id ?? '',
   )
@@ -69,6 +77,11 @@ export function ProductForm({
     const input: ProductInput = {
       name: name.trim(),
       sku: sku.trim(),
+      slug: slug.trim(),
+      description: description.trim(),
+      compareAt: compareAt.trim() ? Number(compareAt) : undefined,
+      badge: badge.trim(),
+      tag: tag || undefined,
       categoryId,
       price: Number(price),
       stock: variants.length ? variantStock : Number(stock),
@@ -94,7 +107,12 @@ export function ProductForm({
     close()
   }
   return (
-    <form noValidate onSubmit={submit} className="space-y-5" data-testid="product-form">
+    <form
+      noValidate
+      onSubmit={submit}
+      className="space-y-5"
+      data-testid="product-form"
+    >
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Product name">
           <input
@@ -170,6 +188,74 @@ export function ProductForm({
         </Field>
       </div>
       <section
+        aria-label="Storefront product details"
+        className="space-y-4 rounded-2xl border border-line p-4"
+      >
+        <div>
+          <h3 className="text-sm font-extrabold">Storefront product details</h3>
+          <p className="mt-1 text-xs text-muted">
+            Draft product data only. These fields do not publish to the customer
+            website.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field
+            label="Product URL slug"
+            hint="Leave empty to generate from the product name. Existing product IDs will not change."
+          >
+            <input
+              className={controlClass}
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              placeholder="everyday-classic-hoodie"
+            />
+          </Field>
+          <Field
+            label="Compare-at price (USD)"
+            hint="Optional original price; must exceed selling price."
+          >
+            <input
+              type="number"
+              min="0.01"
+              step="0.01"
+              className={controlClass}
+              value={compareAt}
+              onChange={(e) => setCompareAt(e.target.value)}
+            />
+          </Field>
+          <Field label="Product badge">
+            <input
+              className={controlClass}
+              value={badge}
+              maxLength={45}
+              onChange={(e) => setBadge(e.target.value)}
+              placeholder="New arrival"
+            />
+          </Field>
+          <Field label="Product tag">
+            <select
+              className={controlClass}
+              value={tag}
+              onChange={(e) => setTag(e.target.value as Product['tag'] | '')}
+            >
+              <option value="">No tag</option>
+              <option value="new">New</option>
+              <option value="popular">Popular</option>
+              <option value="sale">Sale</option>
+            </select>
+          </Field>
+        </div>
+        <Field label="Storefront description">
+          <textarea
+            className={controlClass + ' min-h-24 py-3'}
+            maxLength={3000}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe the item for customers"
+          />
+        </Field>
+      </section>
+      <section
         aria-label="Product variants"
         className="rounded-2xl border border-line bg-slate-50 p-4"
       >
@@ -177,7 +263,8 @@ export function ProductForm({
           <div>
             <h3 className="text-sm font-extrabold">Product variants</h3>
             <p className="mt-1 text-xs text-muted">
-              Size, color, SKU and available quantity per combination.
+              Optional size and/or color, plus SKU and stock per combination
+              (including color-only options).
             </p>
           </div>
           <Button
